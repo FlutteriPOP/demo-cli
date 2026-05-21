@@ -10,16 +10,25 @@ class CommandHandler {
   Future<String> handle(Map<String, dynamic> cmd) async {
     switch (cmd['action']) {
       case 'create':
-        return service.create(cmd['path']?.toString() ?? '', cmd['content']?.toString() ?? '');
+        return service.create(
+          cmd['path']?.toString() ?? '',
+          cmd['content']?.toString() ?? '',
+        );
 
       case 'read':
         return service.read(cmd['path']?.toString() ?? '');
 
       case 'update':
-        return service.update(cmd['path']?.toString() ?? '', cmd['content']?.toString() ?? '');
+        return service.update(
+          cmd['path']?.toString() ?? '',
+          cmd['content']?.toString() ?? '',
+        );
 
       case 'append':
-        return service.append(cmd['path']?.toString() ?? '', cmd['content']?.toString() ?? '');
+        return service.append(
+          cmd['path']?.toString() ?? '',
+          cmd['content']?.toString() ?? '',
+        );
 
       case 'delete':
         return service.delete(cmd['path']?.toString() ?? '');
@@ -28,7 +37,10 @@ class CommandHandler {
         return service.list(cmd['path']?.toString() ?? '');
 
       case 'rename':
-        return service.rename(cmd['path']?.toString() ?? '', cmd['content']?.toString() ?? '');
+        return service.rename(
+          cmd['path']?.toString() ?? '',
+          cmd['content']?.toString() ?? '',
+        );
 
       case 'run':
         try {

@@ -1,4 +1,3 @@
-
 /// Configuration for the application.
 ///
 /// This class holds static constants used throughout the application,

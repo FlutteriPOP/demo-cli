@@ -36,11 +36,7 @@ Here are some example prompts you can use to test each of the features:
 ### 6. File Deletion
 - "delete greeting.txt"
 
-### 7. Multimodal Vision
-- "describe the contents of [image: my_design.png]"
-- "write a flutter widget that looks exactly like [image: mockups/ui.png]"
-
-### 8. Chat and Memory
+### 7. Chat and Memory
 - "what was the first file I asked you to create?"
 - "who are you?"
 - Notice the `(Tokens used: XX)` logged after every action!
