@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:test/test.dart';
-import 'package:demo/core/path_guard.dart';
-import 'package:demo/services/file_service.dart';
+import 'package:dart_ai_cli/core/path_guard.dart';
+import 'package:dart_ai_cli/services/file_service.dart';
 
 void main() {
   group('FileService', () {

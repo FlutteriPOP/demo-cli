@@ -1,37 +1,29 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:demo/commands/command_handler.dart';
-import 'package:demo/services/ai_services.dart';
+import 'package:dart_ai_cli/commands/command_handler.dart';
+import 'package:dart_ai_cli/services/ai_services.dart';
+import 'package:mason_logger/mason_logger.dart';
 
 class CliApp {
   final AIService aiService;
   final CommandHandler commandHandler;
+  final Logger logger;
 
-  CliApp({required this.aiService, required this.commandHandler});
-
-  Timer _showSpinner() {
-    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-    var i = 0;
-    return Timer.periodic(const Duration(milliseconds: 80), (timer) {
-      stdout.write(
-        '\r\x1B[36m${frames[i++ % frames.length]} Thinking...\x1B[0m',
-      );
-    });
-  }
+  CliApp({
+    required this.aiService,
+    required this.commandHandler,
+    required this.logger,
+  });
 
   Future<void> run() async {
-    _printBanner();
+    _printWelcome();
 
     while (true) {
-      stdout.write('\x1B[32m💡 You: \x1B[0m');
-      final input = stdin.readLineSync();
-
-      if (input == null) break;
+      final input = logger.prompt('\n${lightGreen.wrap('❯ You:')} ');
 
       final cmdText = input.trim().toLowerCase();
       if (cmdText == 'exit' || cmdText == 'quit' || cmdText == 'q') {
-        print('\n\x1B[35m👋 Goodbye!\x1B[0m\n');
+        logger.info('\n${lightMagenta.wrap('👋 Goodbye!')}\n');
         break;
       }
 
@@ -43,33 +35,25 @@ class CliApp {
         var iterations = 0;
 
         while (iterations < 10) {
-          final spinner = _showSpinner();
+          final progress = logger.progress('Thinking...');
           Map<String, dynamic> cmd;
           try {
             cmd = await aiService.ask(currentInput, prefix: prefix);
           } finally {
-            spinner.cancel();
-            stdout.write('\r\x1B[K'); // Clear the spinner line
+            progress.complete('Done thinking.');
           }
 
           if (cmd['action'] == 'chat' || cmd['action'] == null) {
             final msg = cmd['message'] ?? 'Done.';
-            print('\x1B[34m→ $msg\x1B[0m');
-            if (cmd['_tokens'] != null) {
-              print('\x1B[90m(Tokens used: ${cmd['_tokens']})\x1B[0m\n');
-            } else {
-              print('');
-            }
+            _printDashMessage(msg, cmd['_tokens']);
             break;
           }
 
+          final action = cmd['action'];
+          final details = cmd['content'] ?? cmd['path'] ?? '';
+          _printDashAction(action as String?, details as String);
+
           final result = await commandHandler.handle(cmd);
-          var output =
-              '\x1B[33m[Action: ${cmd['action']}]\x1B[36m → $result\x1B[0m';
-          if (cmd['_tokens'] != null) {
-            output += ' \x1B[90m(${cmd['_tokens']} tokens)\x1B[0m';
-          }
-          print(output);
 
           currentInput = result;
           prefix = 'System (Result)';
@@ -77,41 +61,58 @@ class CliApp {
         }
 
         if (iterations >= 10) {
-          print('\x1B[31m→ Reached maximum automated steps (10).\x1B[0m\n');
+          logger.err('\n  → Reached maximum automated steps (10).');
         }
       } catch (e) {
         final errorStr = e.toString();
         if (errorStr.contains('RESOURCE_EXHAUSTED') ||
             errorStr.contains('Quota exceeded')) {
-          print('\n\x1B[33m⏳ Whoa, slow down!\x1B[0m');
-          print(
-            '\x1B[31mYou have hit the Google Gemini Free Tier rate limit.\x1B[0m',
-          );
-          print(
-            '\x1B[90mThe Agentic Loop can process many requests very quickly. Please wait about 60 seconds before trying again.\x1B[0m\n',
+          logger.warn('\n  ⏳ Whoa, slow down!');
+          logger.err('  You hit the Gemini Free Tier rate limit.');
+          logger.info(
+            '  ${darkGray.wrap('Please wait 60 seconds before trying again.')}',
           );
         } else {
-          print('\n\x1B[31m🚨 Oops, something went wrong:\x1B[0m');
-          print('\x1B[90m$errorStr\x1B[0m\n');
+          logger.err('\n  🚨 Oops, something went wrong:');
+          logger.info('  ${darkGray.wrap(errorStr)}');
         }
       }
     }
   }
 
-  void _printBanner() {
-    print(
-      '\x1B[36m'
-      r'''
+  void _printDashAction(String? action, String details) {
+    logger.info('\n  ${styleBold.wrap(lightCyan.wrap('╭─ 🤖 AI CLI Action'))}');
+    logger.info(
+      '  ${lightCyan.wrap('│')} ${lightYellow.wrap('[$action]')} $details',
+    );
+    logger.info('  ${lightCyan.wrap('╰────────────────────────────')}');
+  }
+
+  void _printDashMessage(String message, dynamic tokens) {
+    final tokenStr = tokens != null ? ' ${darkGray.wrap('(${tokens}t)')}' : '';
+    logger.info(
+      '\n  ${styleBold.wrap(lightBlue.wrap('╭─ 🤖 AI CLI$tokenStr'))}',
+    );
+    final lines = message.split('\n');
+    for (var line in lines) {
+      logger.info('  ${lightBlue.wrap('│')} $line');
+    }
+    logger.info('  ${lightBlue.wrap('╰────────────────────────────')}');
+  }
+
+  void _printWelcome() {
+    logger.info(
+      lightCyan.wrap(r'''
     ___    ____   ________    ____
    /   |  /  _/  / ____/ /   /  _/
   / /| |  / /   / /   / /    / /
  / ___ |_/ /   / /___/ /____/ /
 /_/  |_/___/   \____/_____/___/
-
-'''
-      '\x1B[0m',
+'''),
     );
-    print('\x1B[33m✨ Welcome to the AI Workspace CLI ✨\x1B[0m');
-    print('\x1B[90mType "quit", "exit", or "q" to leave.\x1B[0m\n');
+    logger.info(
+      '${styleBold.wrap(lightYellow.wrap('✨ Welcome to Dart AI CLI ✨'))}',
+    );
+    logger.info('${darkGray.wrap('Type "quit", "exit", or "q" to leave.')}\n');
   }
 }

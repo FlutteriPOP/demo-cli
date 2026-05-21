@@ -1,4 +1,4 @@
-# AI Workspace CLI
+# Dart AI CLI
 
 A powerful, command-line interface powered by Genkit and Google Gemini that allows you to manage a local workspace using natural language.
 

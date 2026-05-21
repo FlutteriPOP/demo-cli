@@ -1,4 +1,4 @@
-name: demo
+name: dart_ai_cli
 description: A sample command-line application.
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
@@ -8,9 +8,11 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
+  args: ^2.7.0
   dotenv: ^4.2.0
   genkit: ^0.13.2
   genkit_google_genai: ^0.2.7
+  mason_logger: ^0.3.5
   path: ^1.9.0
 
 dev_dependencies:

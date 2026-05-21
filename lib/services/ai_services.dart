@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:demo/core/config.dart';
+import 'package:dart_ai_cli/core/config.dart';
 import 'package:genkit/genkit.dart';
 import 'package:genkit_google_genai/genkit_google_genai.dart';
 
@@ -16,6 +16,9 @@ class AIService {
     _history.add('$prefix: $prompt');
 
     final contentParts = <Part>[TextPart(text: _prompt())];
+
+    // Artificial delay to prevent Gemini Free Tier rate limit (15 requests/min)
+    await Future.delayed(const Duration(seconds: 4));
 
     final res = await _ai.generate(
       model: googleAI.gemini(AppConfig.model),

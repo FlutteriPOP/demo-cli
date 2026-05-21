@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:demo/core/path_guard.dart';
+import 'package:dart_ai_cli/core/path_guard.dart';
 
 class FileService {
   final PathGuard guard;

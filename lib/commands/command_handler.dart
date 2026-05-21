@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:demo/services/file_service.dart';
+import 'package:dart_ai_cli/services/file_service.dart';
 
 class CommandHandler {
   CommandHandler(this.service, this.workspacePath);
