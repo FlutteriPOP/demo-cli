@@ -1,0 +1,70 @@
+# How to Test the AI CLI
+
+You can test the capabilities of this AI CLI by running it from your terminal:
+
+```sh
+dart run
+```
+
+Once the CLI starts, you will see a prompt where you can type instructions.
+
+## What to ask the AI
+
+Here are some example prompts you can use to test each of the features:
+
+### 1. Execute Shell Commands
+- "run flutter create my_new_app"
+- "run ls -la"
+- "check the dart version"
+
+### 2. File Creation
+- "create a file named hello.txt with the content 'Hello World!'"
+- "make a new dart script called script.dart that prints 42"
+
+### 3. File Listing and Reading
+- "list the current directory"
+- "read hello.txt"
+- "what files are in the workspace?"
+
+### 4. File Updating
+- "update hello.txt to say 'Hello Universe!' instead"
+- "add a new line to hello.txt"
+
+### 5. File Renaming
+- "rename hello.txt to greeting.txt"
+
+### 6. File Deletion
+- "delete greeting.txt"
+
+### 7. Multimodal Vision
+- "describe the contents of [image: my_design.png]"
+- "write a flutter widget that looks exactly like [image: mockups/ui.png]"
+
+### 8. Chat and Memory
+- "what was the first file I asked you to create?"
+- "who are you?"
+- Notice the `(Tokens used: XX)` logged after every action!
+
+Remember, all file operations (create, read, update, delete, rename) are sandboxed to the local `/workspace` directory for safety.
+
+
+Before (Single-Step)
+You: "Create a Flutter app and add a new dependency."
+AI: Runs flutter create my_app.
+(The AI stops. It forgets about the second half of your request because it could only output one JSON action at a time).
+You: "Okay, now add the dependency."
+After (Agentic Loop)
+You: "Create a Flutter app and add the path dependency."
+AI (Step 1): Runs flutter create my_app.
+CLI (Under the hood): "Hey AI, that command finished successfully. Are you done with the user's request?"
+AI (Step 2): "No, I still need to add the dependency." Runs flutter pub add path inside the my_app folder.
+CLI (Under the hood): "That command finished too. Are you done now?"
+AI (Step 3): "Yes! I'll output a chat message."
+AI to You: "All done! I created the app and added the dependency."
+Why this is powerful: Because the CLI feeds the results of its actions (like terminal stdout or file contents) back into the AI, the AI can react to errors, read code to figure out what to do, and execute massive, complex tasks entirely on its own without needing you to hold its hand every step of the way!
+
+13:01
+
+
+
+
